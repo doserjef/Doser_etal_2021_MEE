@@ -1,4 +1,4 @@
-# [Integrating automated acoustic vocalization data and point count surveys for estimation of bird abundance](https://arxiv.org/abs/2011.11047)
+# Integrating automated acoustic vocalization data and point count surveys for estimation of bird abundance
 
 Jeffrey W. Doser, Andrew O. Finley, Aaron S. Weed, Elise F. Zipkin
 
