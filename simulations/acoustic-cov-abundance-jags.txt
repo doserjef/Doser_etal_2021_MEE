@@ -1,0 +1,114 @@
+# Author: Jeffrey W. Doser
+# Description: Integrated model combining acoustic and point-count data to 
+#              estimate abundance of a single species, assuming constant
+#              abundance and detection probability across sites. This code
+#              can be used to fit all 4 models described in the manuscript.
+
+# This code extends code from the following sources: 
+#     1. Chambert, T., Waddle, J. H., Miller, D. A., Walls, S. C., 
+#        and Nichols, J. D. (2018). A new framework for analysing 
+#        automated acoustic species detection data: Occupancy estimation 
+#        and optimization of recordings post-processing. 
+#        Methods in Ecology and Evolution, 9(3):560–570.
+#     2. Kery, M., & Royle, J. A. (2020). Applied Hierarchical Modeling in 
+#        Ecology: Analysis of Distribution, Abundance and Species Richness 
+#        in R and BUGS: Volume 2: Dynamic and Advanced Models. Academic Press.
+
+# Citation: 
+#     Doser, J. W., Finley, A. O., Weed, A. S., & Zipkin, E. F. (2021). 
+#     Integrating automated acoustic vocalization data and point count 
+#     surveys for efficient estimation of bird abundance. 
+#     arXiv preprint arXiv:2011.11047.
+
+# Variable Definitions: 
+
+# beta.0 = abundance intercept
+# beta.1 = covariate effect on abundance
+# alpha.0 = probability of detecting at least one vocalization at an
+#           unoccupied site on the logit scale for the acoustic data
+# alpha.1 = additional probability of detecting at least one vocalization
+#           at a site that is occupied on the logit scale for the acoustic
+#           data
+# alpha.2 = effect of covaraite on detecting at least one vocalization
+#           in acoustic data
+# gamma.0 = true vocalization detection intercept in acoustic recordings
+#           with at least one vocalization
+# gamma.1 = covariate effect on true positive detection rate in acoustic
+#           recordings with at least one vocalization
+# phi.0 = detection probability intercept for count data
+# phi.1 = covariate effect on detection probability for count data
+# omega = expected number of false positives for acoustic data in 
+#         recordings with at least one vocalization. 
+# N = latent abundance process
+# tp = true positive rate of acoustic data
+# n.sites = number of total sites
+# p.a = probability of detecting at least one vocalization at site i
+#       during survey j for acoustic data. Denoted as pi in the manuscript.
+# y = takes value 1 when v > 0 and value 0 otherwise. Part of hurdle model 
+#     likelihood for acoustic data.
+# v = acoustic vocalization data from clustering algorithm. 
+# c = point count data
+# J = number of repeat visits for acoustic data
+# n.count = number of repeat visits for count data (T in manuscript)
+# K = true number of correct acoustic vocalizations at each site i and
+#     recording j
+# k = true number of manually validated acoustic vocalizations
+# n = total number of manually validated acoustic vocalizations 
+# sites.a = specific indices of sites where acoustic data were obtained
+# X.1 = abundance covariate
+# X.2 = covariate on prob of detecting at least one vocalization in 
+#       acoustic data
+# X.3 = covariate on true positive vocalization detection rate in acoustic
+#       data
+# X.4 = covariate on detection probability of count data. 
+
+model {
+
+  # Priors ----------------------------------------------------------------
+  beta.0 ~ dnorm(0, .01)
+  beta.1 ~ dnorm(0, .01)
+  alpha.0 <- logit(mu.alpha)
+  mu.alpha ~ dunif(0, 1)
+  alpha.1 ~ dunif(0, 1000) # Constrained to be positive
+  alpha.2 ~ dnorm(0, 0.01)
+  gamma.0 ~ dnorm(0, 0.01)
+  gamma.1 ~ dnorm(0, 0.01)
+  phi.0 <- logit(mu.phi)
+  mu.phi ~ dunif(0, 1)
+  phi.1 ~ dnorm(0, 0.01)
+  omega ~ dunif(0, 1000)
+
+  # Liklihood and process model -------------------------------------------
+  for (i in 1:n.sites) {
+    log(lambda[i]) <- beta.0 + beta.1 * X.1[i, 2]
+    N[i] ~ dpois(lambda[i])
+    # Acoustic Data -------------------
+    # Binary ----------------
+    for (j in 1:J[i]) {
+      logit(p.a[i, j]) <- alpha.0 + alpha.1 * N[i] + alpha.2 * X.2[i, j]
+      log(delta[i, j]) <- gamma.0 + gamma.1 * X.3[i, j]
+      tp[i, j] <- delta[i, j] * N[i] / (delta[i, j] * N[i] + omega)
+      y[i, j] ~ dbin(p.a[i, j], 1)
+    }
+    # Vocalizations ---------
+    for (j in 1:J.r[i]) {
+      v[i, A.times[i, j]] ~ dpois((delta[i, A.times[i, j]] * N[i] + omega) * y[i, A.times[i, j]]) T(1, )
+    } # j
+    # Count Data ----------------------
+    for (j in 1:n.count[i]) {
+      logit(p[i, j]) <- phi.0 + phi.1 * X.4[i, j]
+      c[i, j] ~ dbin(p[i, j], N[i])
+    } # j
+  } # i
+
+  # Manual validation -----------------
+  for (i in 1:sites.val) {
+
+    for (j in 1:J[sites.a[i]]) {
+      K[i, j] ~ dbin(tp[sites.a[i], j], v[sites.a[i], j])
+      k[i, j] ~ dhyper(K[i, j], v[sites.a[i], j] - K[i, j], n[i, j], 1)
+    } # j
+  } # i
+
+
+}

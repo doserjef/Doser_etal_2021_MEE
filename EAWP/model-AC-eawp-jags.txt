@@ -1,0 +1,98 @@
+# Author: Jeffrey W. Doser
+# Description: Integrated model combining acoustic and point-count data to 
+#              estimate abundance of a single species, assuming constant
+#              abundance and detection probability across sites used to 
+#              fit data from Marsh-Billings-Rockefeller National Historic
+#              Park to estimate Eastern Wood-pewee abundance. 
+
+# This code extends code from the following sources: 
+#     1. Chambert, T., Waddle, J. H., Miller, D. A., Walls, S. C., 
+#        and Nichols, J. D. (2018b). A new framework for analysing 
+#        automated acoustic species detection data: Occupancy estimation 
+#        and optimization of recordings post-processing. 
+#        Methods in Ecology and Evolution, 9(3):560–570.
+#     2. Kery, M. and Royle, J. A. (2020). Applied hierarchical modeling 
+#        in ecology: Analysis of distribution, abundance, and species 
+#        richness in R and BUGS: Volume 2: Dynamic and advanced models. 
+#        (in press). Academic Press.
+
+# Citation: 
+#     Doser, J.W., Finley, A. O., Weed, A. S., and Zipkin, E. F. (2020).
+#     Integrating automated acoustic vocalization data and point count 
+#     surveys for efficient estimation of bird abundance. 
+#     arXiv preprint arXiv:2011.11047.
+
+# See model-AVC-eawp-jags.txt for variable definitions. 
+model {
+
+  # Priors ----------------------------------------------------------------
+  beta.0 ~ dnorm(0, .01)
+  beta.1 ~ dnorm(0, .01)
+  alpha.0 <- logit(mu.alpha)
+  mu.alpha ~ dunif(0, 1)
+  alpha.1 ~ dunif(0, 1000) # Constrained to be positive
+  omega ~ dunif(0, 1000)
+  p ~ dunif(0, 1)
+  tau.day ~ dgamma(.01, .01)
+  a.phi ~ dunif(0, 100)
+
+  for (i in 1:n.days) {
+    gamma.1[i] ~ dnorm(0, tau.day)
+  }
+
+  for (i in 1:R) {
+    for (j in 1:J.A) {
+      phi[i, j] ~ dgamma(a.phi, a.phi)
+    }
+  }
+  # Liklihood and process model -------------------------------------------
+  for (i in 1:R) {
+    log(lambda[i]) <- beta.0 + beta.1 * X.lambda[i, 2]
+    N[i] ~ dpois(lambda[i])
+    logit(p.a[i]) <- alpha.0 + alpha.1 * N[i]
+    # Acoustic Data -------------------
+    for (j in 1:J[i]) {
+      log(delta[i, j]) <- gamma.1[days[i, j]]
+      y[i, j] ~ dbin(p.a[i], 1)
+      tp[i, j] <- delta[i, j] * N[i] / (delta[i, j] * N[i] + omega)
+      # Posterior predictive checks for Bayesian P-value
+      y.pred[i, j] ~ dbin(p.a[i], 1)
+      resid.y[i, j] <- pow(pow(y[i, j], 0.5) - pow(p.a[i], 0.5), 2)
+      resid.y.pred[i, j] <- pow(pow(y.pred[i, j], 0.5) - pow(p.a[i], 0.5), 2)
+    } # j
+    for (j in 1:J.r[i]) {
+      v[i, A.times[i, j]] ~ dpois((delta[i, A.times[i, j]] * N[i] + omega) * phi[i, A.times[i, j]] * y[i, A.times[i, j]]) T(1, )
+      v.pred[i, j] ~ dpois((delta[i, A.times[i, j]] * N[i] + omega) * phi[i, A.times[i, j]] * y[i, A.times[i, j]]) T(1, )
+      mu.v[i, j] <- ((delta[i, A.times[i, j]] * N[i] + omega) * phi[i, A.times[i, j]]) / (1 - exp(-1 * ((delta[i, A.times[i, j]] * N[i] + omega) * phi[i, A.times[i, j]])))
+      resid.v[i, j] <- pow(pow(v[i, A.times[i, j]], 0.5) - pow(mu.v[i, j], 0.5), 2)
+      resid.v.pred[i, j] <- pow(pow(v.pred[i, j], 0.5) - pow(mu.v[i, j], 0.5), 2)
+    } # j
+    # Count Data ----------------------
+    for (j in 1:n.count[i]) {
+      c[i, j] ~ dbin(p, N[i])
+      c.pred[i, j] ~ dbin(p, N[i])
+      resid.c[i, j] <- pow(pow(c[i, j], 0.5) - pow(p * N[i], 0.5), 2)
+      resid.c.pred[i, j] <- pow(pow(c.pred[i, j], 0.5) - pow(p * N[i], 0.5), 2)
+    } # j
+  } # i
+
+  # Bayesian P-value ------------------------------------------------------
+  for (i in 1:R.C) {
+    tmp.c[i] <- sum(resid.c[sites.c[i], 1:n.count.c[i]])
+    tmp.c.pred[i] <- sum(resid.c.pred[sites.c[i], 1:n.count.c[i]])   
+  } # i
+  for (i in 1:R.A) {
+    tmp.v[i] <- sum(resid.v[sites.a.v[i], 1:J.r[sites.a.v[i]]])
+    tmp.v.pred[i] <- sum(resid.v.pred[sites.a.v[i], 1:J.r[sites.a.v[i]]])
+  }
+  fit.y <- sum(resid.y[sites.a, 1:J.A])
+  fit.y.pred <- sum(resid.y.pred[sites.a, 1:J.A])
+  fit.c <- sum(tmp.c[1:R.C])
+  fit.c.pred <- sum(tmp.c.pred[1:R.C])
+  fit.v <- sum(tmp.v[1:R.A])
+  fit.v.pred <- sum(tmp.v.pred[1:R.A])
+  bp.y <- step(fit.y.pred - fit.y)
+  bp.c <- step(fit.c.pred - fit.c)
+  bp.v <- step(fit.v.pred - fit.v)
+
+}

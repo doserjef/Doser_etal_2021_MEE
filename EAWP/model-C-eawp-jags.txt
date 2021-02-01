@@ -1,0 +1,57 @@
+# Author: Jeffrey W. Doser
+# Description: Integrated model combining acoustic and point-count data to 
+#              estimate abundance of a single species, assuming constant
+#              abundance and detection probability across sites used to 
+#              fit data from Marsh-Billings-Rockefeller National Historic
+#              Park to estimate Eastern Wood-pewee abundance. 
+
+# This code extends code from the following sources: 
+#     1. Chambert, T., Waddle, J. H., Miller, D. A., Walls, S. C., 
+#        and Nichols, J. D. (2018b). A new framework for analysing 
+#        automated acoustic species detection data: Occupancy estimation 
+#        and optimization of recordings post-processing. 
+#        Methods in Ecology and Evolution, 9(3):560–570.
+#     2. Kery, M. and Royle, J. A. (2020). Applied hierarchical modeling 
+#        in ecology: Analysis of distribution, abundance, and species 
+#        richness in R and BUGS: Volume 2: Dynamic and advanced models. 
+#        (in press). Academic Press.
+
+# Citation: 
+#     Doser, J.W., Finley, A. O., Weed, A. S., and Zipkin, E. F. (2020).
+#     Integrating automated acoustic vocalization data and point count 
+#     surveys for efficient estimation of bird abundance. 
+#     arXiv preprint arXiv:2011.11047.
+
+# See model-AVC-eawp-jags.txt for variable definitions. 
+
+model {
+
+  # Priors ----------------------------------------------------------------
+  beta.0 ~ dnorm(0, .01)
+  beta.1 ~ dnorm(0, .01)
+  p ~ dunif(0, 1)
+
+  # Liklihood and process model -------------------------------------------
+  for (i in 1:R) {
+    log(lambda[i]) <- beta.0 + beta.1 * X.lambda[i, 2]
+    N[i] ~ dpois(lambda[i])
+    # Count Data ----------------------
+    for (j in 1:n.count[i]) {
+      c[i, j] ~ dbin(p, N[i])
+      c.pred[i, j] ~ dbin(p, N[i])
+      resid.c[i, j] <- pow(pow(c[i, j], 0.5) - pow(p * N[i], 0.5), 2)
+      resid.c.pred[i, j] <- pow(pow(c.pred[i, j], 0.5) - pow(p * N[i], 0.5), 2)
+    } # j
+  } # i
+
+
+  # Bayesian P-value ------------------------------------------------------
+  for (i in 1:R.C) {
+    tmp.c[i] <- sum(resid.c[sites.c[i], 1:n.count.c[i]])
+    tmp.c.pred[i] <- sum(resid.c.pred[sites.c[i], 1:n.count.c[i]])   
+  } # i
+  fit.c <- sum(tmp.c[1:R.C])
+  fit.c.pred <- sum(tmp.c.pred[1:R.C])
+  bp.c <- step(fit.c.pred - fit.c)
+
+}
