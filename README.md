@@ -4,10 +4,9 @@
 
 ### Jeffrey W. Doser, Andrew O. Finley, Aaron S. Weed, Elise F. Zipkin
 
+### Code/Data DOI: [![DOI](https://zenodo.org/badge/335017541.svg)](https://zenodo.org/badge/latestdoi/335017541)
 
-
-
-Please contact the first author for questions about the code or data: Jeffrey W. Doser (doserjef@msu.edu)
+### Please contact the first author for questions about the code or data: Jeffrey W. Doser (doserjef@msu.edu)
 
 # simulations
 
