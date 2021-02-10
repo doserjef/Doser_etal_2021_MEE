@@ -1,6 +1,10 @@
 # Integrating automated acoustic vocalization data and point count surveys for estimation of bird abundance
 
-Jeffrey W. Doser, Andrew O. Finley, Aaron S. Weed, Elise F. Zipkin
+### Methods in Ecology and Evolution
+
+### Jeffrey W. Doser, Andrew O. Finley, Aaron S. Weed, Elise F. Zipkin
+
+
 
 
 Please contact the first author for questions about the code or data: Jeffrey W. Doser (doserjef@msu.edu)
