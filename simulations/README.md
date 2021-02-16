@@ -14,3 +14,6 @@ For questions about code, contact the first author (doserjef@msu.edu).
 8. `sim-acoustic-cov.R`: file to simulate data under any of the four models. 
 9. `model-AC-main-2-sims.R`: file to run simulations shown in Figure 3. 
 10. `model-AC-summary-2.R`: file to summarize simulations from `model-AC-main-2-sims.R`. Includes code for Figure 3.
+11. `covariate-simulation-results-beta-0.csv`: summary file of simulation results needed to produce Figure 2.
+12. `covariate-simulation-results-beta-1.csv`: summary file of simulation results needed to produce Figure S2.
+13. `spatial-simulation-results.csv`: summary file of simulation results needed to produce Figure 3.
