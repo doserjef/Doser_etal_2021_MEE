@@ -1,13 +1,13 @@
 # Author: Jeffrey W. Doser
-# Code: script to run simulations for Model ACV in Doser et al. (2020). 
+# Code: script to run simulations for Model ACV in Doser et al. (2021). 
 #       Model ACV incorporates automated acoustic vocalization data,
 #       a subset of manually verified vocalizations, and point count data
 
 # Citation: 
-#     Doser, J.W., Finley, A. O., Weed, A. S., and Zipkin, E. F. (2020).
+#     Doser, J.W., Finley, A. O., Weed, A. S., and Zipkin, E. F. (2021).
 #     Integrating automated acoustic vocalization data and point count 
-#     surveys for efficient estimation of bird abundance. 
-#     arXiv preprint arXiv:2011.11047.
+#     surveys for estimation of bird abundance. In press.
+#     Methods in Ecology and Evolution. 
 
 # For variable defintions, see "sim-cov-acoustic.R" script
 

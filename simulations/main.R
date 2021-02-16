@@ -1,12 +1,12 @@
 # Author: Jeffrey W. Doser
 # Code: script to run integrated acoustic and point count data models from 
-#       Doser et al. (2020)
+#       Doser et al. (2021)
 
 # Citation: 
 #     Doser, J.W., Finley, A. O., Weed, A. S., and Zipkin, E. F. (2021).
-#     Integrating acoustic recordings and point count surveys for 
-#     efficient estimation of bird abundance. 
-#     arXiv preprint arXiv:2011.11047.
+#     Integrating automated acoustic vocalization data and point count 
+#     surveys for estimation of bird abundance. In press.
+#     Methods in Ecology and Evolution. 
 
 rm(list = ls())
 library(AHMbook)

@@ -1,6 +1,6 @@
 # Author: Jeffrey W. Doser
 # Code: function to simulate acoustic and point count data for use in the 
-#       simulation study of Doser et al. (2020)
+#       simulation study of Doser et al. (2021)
 
 # This code extends code from the following sources: 
 #     1. Chambert, T., Waddle, J. H., Miller, D. A., Walls, S. C., 
@@ -11,13 +11,13 @@
 #     2. Kery, M. and Royle, J. A. (2020). Applied hierarchical modeling 
 #        in ecology: Analysis of distribution, abundance, and species 
 #        richness in R and BUGS: Volume 2: Dynamic and advanced models. 
-#        (in press). Academic Press.
+#        Academic Press.
 
 # Citation: 
 #     Doser, J.W., Finley, A. O., Weed, A. S., and Zipkin, E. F. (2021).
 #     Integrating automated acoustic vocalization data and point count 
-#     surveys for efficient estimation of bird abundance. 
-#     arXiv preprint arXiv:2011.11047.
+#     surveys for estimation of bird abundance. In press.
+#     Methods in Ecology and Evolution. 
 
 # Variable definitions
 

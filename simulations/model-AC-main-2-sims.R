@@ -1,14 +1,14 @@
 # Author: Jeffrey W. Doser
-# Code: script to run simulations for Figure 4 in Doser et al. (2020).
+# Code: script to run simulations for Figure 4 in Doser et al. (2021).
 #       Goal of these simulations is to determine how adding high
 #       quality point count data to acoustic recordings influences
 #       precision and accuracy of abundance estimates. 
 
 # Citation: 
-#     Doser, J.W., Finley, A. O., Weed, A. S., and Zipkin, E. F. (2020).
+#     Doser, J.W., Finley, A. O., Weed, A. S., and Zipkin, E. F. (2021).
 #     Integrating automated acoustic vocalization data and point count 
-#     surveys for efficient estimation of bird abundance. 
-#     arXiv preprint arXiv:2011.11047.
+#     surveys for estimation of bird abundance. In press.
+#     Methods in Ecology and Evolution. 
 
 # For variable defintions, see "sim-cov-acoustic.R" script
 
